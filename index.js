@@ -3,12 +3,6 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const { Server: SocketIOServer } = require("socket.io");
-const {
-  ThermalPrinter,
-  PrinterTypes,
-  CharacterSet,
-  BreakLine,
-} = require("node-thermal-printer");
 
 const PORT = process.env.PORT || 4000;
 
@@ -28,16 +22,17 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: (origin, cb) => {
-      // Allow no-origin (mis. curl/postman) atau check list
-      if (!origin) return cb(null, true);
-      if (allowedOrigins.includes(origin)) return cb(null, true);
+    // origin: (origin, cb) => {
+    //   // Allow no-origin (mis. curl/postman) atau check list
+    //   if (!origin) return cb(null, true);
+    //   if (allowedOrigins.includes(origin)) return cb(null, true);
 
-      // Contoh: izinkan semua subdomain vercel tertentu (opsional)
-      if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
+    //   // Contoh: izinkan semua subdomain vercel tertentu (opsional)
+    //   if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
 
-      return cb(new Error("CORS: Origin not allowed"));
-    },
+    //   return cb(new Error("CORS: Origin not allowed"));
+    // },
+    origin: allowedOrigins,
     credentials: true, // selaraskan dengan klien bila pakai cookie
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
