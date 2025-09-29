@@ -8,13 +8,9 @@ const PORT = process.env.PORT || 4000;
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://api-show-46cu.vercel.app/",
+  "https://api-show-nine.vercel.app",
   "https://api-show-46cu.vercel.app",
-  "https://www.api-show-46cu.vercel.app/",
-  "https://www.api-show-46cu.vercel.app",
-  "https://show-infinix.vercel.app/",
   "https://show-infinix.vercel.app",
-  "https://www.show-infinix.vercel.app/",
   "https://www.show-infinix.vercel.app",
 ];
 
@@ -22,18 +18,13 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    // origin: (origin, cb) => {
-    //   // Allow no-origin (mis. curl/postman) atau check list
-    //   if (!origin) return cb(null, true);
-    //   if (allowedOrigins.includes(origin)) return cb(null, true);
-
-    //   // Contoh: izinkan semua subdomain vercel tertentu (opsional)
-    //   if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
-
-    //   return cb(new Error("CORS: Origin not allowed"));
-    // },
-    origin: allowedOrigins,
-    credentials: true, // selaraskan dengan klien bila pakai cookie
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
+      return cb(new Error("CORS: Origin not allowed"));
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
 );
@@ -53,8 +44,6 @@ const httpServer = http.createServer(app);
 //   // path: "/socket.io", // default; ubah jika dibutuhkan
 // });
 const io = new SocketIOServer(httpServer, {
-  // Jika reverse proxy memberi prefix path untuk WS, set path yang sama di sini dan di klien
-  // path: "/ws/socket.io",
   cors: {
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
@@ -62,14 +51,13 @@ const io = new SocketIOServer(httpServer, {
       if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
       return cb(new Error("Socket.IO CORS: Origin not allowed"));
     },
-    credentials: true, // konsisten dengan Express
+    credentials: true,
     methods: ["GET", "POST"],
   },
-  transports: ["polling", "websocket"], // default OK, biarkan fallback polling
+  transports: ["websocket", "polling"],
   pingTimeout: 60000,
   pingInterval: 25000,
-  // Sesuaikan ukuran buffer sesuai payload realistis
-  maxHttpBufferSize: 5e6, // 5 MB agar tidak terlalu besar saat polling
+  maxHttpBufferSize: 5e6,
 });
 
 // Point system
