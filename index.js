@@ -11,15 +11,18 @@ const {
 } = require("node-thermal-printer");
 
 const PORT = process.env.PORT || 4000;
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || "http://localhost:3000")
-  .split(",")
-  .map((s) => s.trim());
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://api-show-46cu.vercel.app",
+  "https://www.api-show-46cu.vercel.app",
+];
 
 const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ALLOWED_ORIGINS,
+    origin: allowedOrigins,
     credentials: false, // set true bila perlu cookie
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
@@ -242,6 +245,35 @@ io.on("connection", (socket) => {
   socket.on("error", (err) => {
     console.error(`❌ Socket error from ${socket.id}:`, err);
   });
+});
+
+app.get("/", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Welcome Event</title>
+        <style>
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+          }
+          h1 {
+            font-size: 3rem;
+            color: #333;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Welcome Service Event Infinix</h1>
+      </body>
+    </html>
+  `);
 });
 
 httpServer.listen(PORT, () => {
