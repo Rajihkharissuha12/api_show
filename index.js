@@ -16,6 +16,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://api-show-46cu.vercel.app",
   "https://www.api-show-46cu.vercel.app",
+  "https://show-infinix.vercel.app/",
+  "https://www.show-infinix.vercel.app/",
 ];
 
 const app = express();
