@@ -32,7 +32,7 @@ const httpServer = http.createServer(app);
 
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: ALLOWED_ORIGINS,
+    origin: allowedOrigins,
     credentials: false,
     methods: ["GET", "POST"],
   },
@@ -260,7 +260,7 @@ app.get("/", (req, res) => {
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f5f5f5;
+            background-color:rgb(126, 56, 56);
             font-family: Arial, sans-serif;
           }
           h1 {
