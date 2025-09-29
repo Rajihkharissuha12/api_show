@@ -22,25 +22,53 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: false, // set true bila perlu cookie
+    origin: (origin, cb) => {
+      // Allow no-origin (mis. curl/postman) atau check list
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+
+      // Contoh: izinkan semua subdomain vercel tertentu (opsional)
+      if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
+
+      return cb(new Error("CORS: Origin not allowed"));
+    },
+    credentials: true, // selaraskan dengan klien bila pakai cookie
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
 );
 
 const httpServer = http.createServer(app);
 
+// const io = new SocketIOServer(httpServer, {
+//   cors: {
+//     origin: allowedOrigins,
+//     credentials: false,
+//     methods: ["GET", "POST"],
+//   },
+//   transports: ["polling", "websocket"],
+//   pingTimeout: 60000,
+//   pingInterval: 25000,
+//   maxHttpBufferSize: 1e7,
+//   // path: "/socket.io", // default; ubah jika dibutuhkan
+// });
 const io = new SocketIOServer(httpServer, {
+  // Jika reverse proxy memberi prefix path untuk WS, set path yang sama di sini dan di klien
+  // path: "/ws/socket.io",
   cors: {
-    origin: allowedOrigins,
-    credentials: false,
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true);
+      return cb(new Error("Socket.IO CORS: Origin not allowed"));
+    },
+    credentials: true, // konsisten dengan Express
     methods: ["GET", "POST"],
   },
-  transports: ["polling", "websocket"],
+  transports: ["polling", "websocket"], // default OK, biarkan fallback polling
   pingTimeout: 60000,
   pingInterval: 25000,
-  maxHttpBufferSize: 1e7,
-  // path: "/socket.io", // default; ubah jika dibutuhkan
+  // Sesuaikan ukuran buffer sesuai payload realistis
+  maxHttpBufferSize: 5e6, // 5 MB agar tidak terlalu besar saat polling
 });
 
 // Point system
